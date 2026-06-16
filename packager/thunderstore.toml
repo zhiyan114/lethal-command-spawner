@@ -1,0 +1,32 @@
+[config]
+schemaVersion = "0.0.1"
+
+[package]
+namespace = "FurryNet"
+name = "LethalCommService"
+versionNumber = "1.0.2"
+description = "Lethal Terminal Utility Commands"
+websiteUrl = "https://github.com/zhiyan114/lethal-command-spawner"
+containsNsfwContent = false
+[package.dependencies]
+BepInEx-BepInExPack = "5.4.2305"
+
+[build]
+icon = "./icon.png"
+readme = "./pkgREADME.md"
+outdir = "./build"
+
+[[build.copy]]
+source = "../LethalChatSpawner/bin/Release/netstandard2.1/LethalChatSpawner.dll"
+target = "/BepInEx/plugins/"
+
+[[build.copy]]
+source = "./CHANGELOG.md"
+target = "./CHANGELOG.md"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = [ "lethal-company" ]
+lethal-company = [ "Tools"' BepInEx" ]
+
+
