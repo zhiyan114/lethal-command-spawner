@@ -333,15 +333,18 @@ namespace LethalChatSpawner
                         Print(t, "Please choose the type of quota to modify");
                         return;
                     }
-                    int amount = 0;
+                    int amount = -1;
                     if (args.Length > 1)
                         int.TryParse(args[1], out amount);
 
                     switch (args[0])
                     {
+                        case "due":
+                            if (amount != 0) break;
+                            Print(t, "Setting due quota to 0 can potentially break enemy spawning; thus, this is not allowed!");
+                            return;
                         case "time":
                         case "cur":
-                        case "due":
                             break;
                         default:
                             Print(t, "Invalid type of quota, choose: time, cur, or due");

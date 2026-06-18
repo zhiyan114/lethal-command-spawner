@@ -113,7 +113,7 @@ namespace LethalChatSpawner
         {
             LCSLogic.SetBalance(val);
         }
-        public void changeQuota(string type, int val = 0)
+        public void changeQuota(string type, int val = -1)
         {
             if (NetworkManager.Singleton.IsServer)
             {
@@ -133,11 +133,12 @@ namespace LethalChatSpawner
         public void syncQuotaClientRpc(int Fulfilled, int reqQuota, float time)
         {
             TimeOfDay ToDInstance = TimeOfDay.Instance;
-            ToDInstance.quotaVariables.deadlineDaysAmount = (int)time;
+            // ToDInstance.quotaVariables.deadlineDaysAmount = time;
             ToDInstance.timeUntilDeadline = time;
             ToDInstance.quotaFulfilled = Fulfilled;
             ToDInstance.profitQuota = reqQuota;
             ToDInstance.UpdateProfitQuotaCurrentTime();
+            ToDInstance.SetBuyingRateForDay();
         }
     }
 

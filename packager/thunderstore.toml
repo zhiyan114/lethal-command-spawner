@@ -4,7 +4,7 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "FurryNet"
 name = "LethalCommService"
-versionNumber = "1.0.2"
+versionNumber = "1.0.3"
 description = "Lethal Terminal Utility Commands"
 websiteUrl = "https://github.com/zhiyan114/lethal-command-spawner"
 containsNsfwContent = false
@@ -27,6 +27,6 @@ target = "./CHANGELOG.md"
 [publish]
 repository = "https://thunderstore.io"
 communities = [ "lethal-company" ]
-lethal-company = [ "Tools"' BepInEx" ]
+lethal-company = [ "Tools", "BepInEx" ]
 
 

@@ -23,7 +23,7 @@ namespace LethalChatSpawner
     {
         public const string modGUID = "FurryNet.lethalCommService";
         public const string modName = "lethalCommService";
-        public const string modVersion = "1.0.1";
+        public const string modVersion = "1.0.3";
 #if DEBUG
         public const string environment = "dev";
         public const string sentryDSN = null;
@@ -279,28 +279,6 @@ namespace LethalChatSpawner
 
         public static void syncInternalSet()
         {
-            //foreach(SelectableLevel level in StartOfRound.Instance.levels)
-            //{
-            //    foreach (SpawnableEnemyWithRarity e in level.Enemies)
-            //        globalEnemies.Add(e.enemyType);
-
-            //    foreach (SpawnableEnemyWithRarity e in level.OutsideEnemies)
-            //        globalEnemies.Add(e.enemyType);
-            //}
-            //// Add special enemies
-            //ButlerEnemyAI butler = Resources.FindObjectsOfTypeAll<ButlerEnemyAI>().FirstOrDefault();
-            //if(butler != null)
-            //{
-            //    globalEnemies.Add(butler.butlerBeesEnemyType);
-            //    LCSMain.logger.LogInfo($"Successfully added special enemy: {butler.butlerBeesEnemyType.enemyName}");
-            //}
-            //RedLocustBees hive = UnityEngine.Object.FindObjectOfType<RedLocustBees>();
-            //if(hive != null)
-            //{
-            //    globalEnemies.Add(hive.enemyType);
-            //    LCSMain.logger.LogInfo($"Successfully added special enemy: {hive.enemyType.enemyName}");
-            //}
-
             foreach (EnemyType enemyType in Resources.FindObjectsOfTypeAll<EnemyType>())
                 globalEnemies.Add(enemyType);
             foreach(IndoorMapHazardType traps in Resources.FindObjectsOfTypeAll<IndoorMapHazardType>())
@@ -355,6 +333,15 @@ namespace LethalChatSpawner
             {
                 grabObj.SetScrapValue(price);
                 RoundManager.Instance.SyncScrapValuesClientRpc(new NetworkObjectReference[] { new NetworkObjectReference(netObj) }, new int[] { price });
+            }
+
+            // Check if item is spawned on ship ground
+            bool isShip = StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(obj.transform.position);
+            if(isShip)
+            {
+                grabObj.isInShipRoom = true;
+                grabObj.isInElevator = true;
+                grabObj.transform.SetParent(StartOfRound.Instance.elevatorTransform, true);
             }
 
             LCSMain.logger.LogInfo("Item Spawned!",new Dictionary<string, object>()
@@ -425,29 +412,26 @@ namespace LethalChatSpawner
             });
         }
 
-        public static void changeQuota(string type, int val = 0)
+        public static void changeQuota(string type, int val = -1)
         {
             if (!NetworkManager.Singleton.IsServer) return;
             TimeOfDay ToDInstance = TimeOfDay.Instance;
             switch (type)
             {
                 case "time":
-                    ToDInstance.quotaVariables.deadlineDaysAmount = val > 0 ? val : 100;
-                    ToDInstance.timeUntilDeadline = (val > 0 ? val : 100) * ToDInstance.totalTime;
-                    // ToDInstance.SyncTimeClientRpc(ToDInstance.globalTime, (int)ToDInstance.timeUntilDeadline);
+                    // ToDInstance.quotaVariables.deadlineDaysAmount = val > 0 ? val : 100;
+                    ToDInstance.timeUntilDeadline = (val > -1 ? val : 100) * ToDInstance.totalTime;
                     break;
                 case "cur":
-                    ToDInstance.quotaFulfilled = val > 0 ? val : 9999;
+                    ToDInstance.quotaFulfilled = val > -1 ? val : 9999;
                     break;
                 case "due":
-                    ToDInstance.profitQuota = val > 0 ? val : 9999;
+                    ToDInstance.profitQuota = val > -1 ? val : 9999;
                     break;
             }
-            //ToDInstance.UpdateProfitQuotaCurrentTime();
-            //if(syncClient)
-            //    TimeOfDay.Instance.SyncNewProfitQuotaClientRpc(ToDInstance.profitQuota, -1, ToDInstance.quotaFulfilled);
-            //else
-            //    ToDInstance.UpdateProfitQuotaCurrentTime();
+            ToDInstance.UpdateProfitQuotaCurrentTime();
+            ToDInstance.SetBuyingRateForDay();
+
             RPCHandle.Instance.syncQuotaClientRpc(ToDInstance.quotaFulfilled, ToDInstance.profitQuota, ToDInstance.timeUntilDeadline);
             LCSMain.logger.LogInfo($"Changed quota for {type} to {val}");
         }
